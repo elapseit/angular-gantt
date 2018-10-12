@@ -114,6 +114,8 @@ angular.module('angularGanttDemoApp')
             groupDisplayMode: 'group',
             filterTask: '',
             filterRow: '',
+            color: '',
+            colors: [{label: "color 1", value: "00FFAA"}, {label: "color 2", value : "ED4465"}],
             timeFrames: {
                 'day': {
                     start: moment('8:00', 'HH:mm'),
@@ -162,6 +164,15 @@ angular.module('angularGanttDemoApp')
             dependencies: {
                 enabled: true,
                 conflictChecker: true
+            },
+            movable: {
+                allowRowSwitching: function(task, targetRow) {
+                    return task.row.model.name !== 'Milestones' && targetRow.model.name !== 'Milestones';
+                }
+            },
+            corner: {
+                headersLabels: function(key) {return key.charAt(0).toUpperCase() + key.slice(1);},
+                headersLabelsTemplates: '{{getLabel(header)}} <i class="fa fa-calendar"></i>'
             },
             targetDataAddRowIndex: undefined,
             canDraw: function(event) {
@@ -319,6 +330,17 @@ angular.module('angularGanttDemoApp')
                 });
             }
         });
+        
+        $scope.$watch('options.color', function(newValue, oldValue) {
+            if (newValue !== oldValue) {
+                $scope.api.side.setWidth(undefined);
+                $timeout(function() {
+                	$scope.data[0].color = newValue;
+                	//$scope.data.splice(2);
+                    $scope.api.tasks.updateStyle("aaa", newValue);
+                });
+            }
+        });
 
         $scope.canAutoWidth = function(scale) {
             if (scale.match(/.*?hour.*?/) || scale.match(/.*?minute.*?/)) {
@@ -414,7 +436,7 @@ angular.module('angularGanttDemoApp')
                 var task = angular.fromJson(taskJson);
                 objectModel.cleanTask(task);
                 var model = $scope.live.task;
-                angular.extend(model, task);
+                angular.merge(model, task);
             }
         }, debounceValue);
         $scope.$watch('live.taskJson', listenTaskJson);
@@ -430,7 +452,7 @@ angular.module('angularGanttDemoApp')
 
                 var rowModel = $scope.live.row;
 
-                angular.extend(rowModel, row);
+                angular.merge(rowModel, row);
 
                 var newTasks = {};
                 var i, l;
@@ -454,7 +476,7 @@ angular.module('angularGanttDemoApp')
                             rowModel.tasks.splice(i, 1);
                         } else {
                             objectModel.cleanTask(newTask);
-                            angular.extend(existingTask, newTask);
+                            angular.merge(existingTask, newTask);
                             delete newTasks[existingTask.id];
                         }
                     }
@@ -469,20 +491,28 @@ angular.module('angularGanttDemoApp')
         }, debounceValue);
         $scope.$watch('live.rowJson', listenRowJson);
 
+
         $scope.$watchCollection('live.task', function(task) {
-            $scope.live.taskJson = angular.toJson(task, true);
-            $scope.live.rowJson = angular.toJson($scope.live.row, true);
+            $timeout(function() {
+                $scope.live.taskJson = angular.toJson(task, true);
+                $scope.live.rowJson = angular.toJson($scope.live.row, true);
+            });
         });
 
         $scope.$watchCollection('live.row', function(row) {
-            $scope.live.rowJson = angular.toJson(row, true);
-            if (row !== undefined && row.tasks !== undefined && row.tasks.indexOf($scope.live.task) < 0) {
-                $scope.live.task = row.tasks[0];
-            }
+            $timeout(function() {
+                $scope.live.rowJson = angular.toJson(row, true);
+                if (row !== undefined && row.tasks !== undefined && row.tasks.indexOf($scope.live.task) < 0) {
+                    $scope.live.task = row.tasks[0];
+                }
+            });
+
         });
 
         $scope.$watchCollection('live.row.tasks', function() {
-            $scope.live.rowJson = angular.toJson($scope.live.row, true);
+            $timeout(function() {
+                $scope.live.rowJson = angular.toJson($scope.live.row, true);
+            });
         });
 
     }]);

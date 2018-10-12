@@ -73,17 +73,7 @@
                 var startDate = moment(date);
                 var endDate = moment(startDate).add(viewScaleValue, viewScaleUnit);
                 ensureNoUnitOverflow(viewScaleUnit, startDate, endDate);
-
-                var column = builder.newColumn(startDate, endDate, leftOffset ? left + leftOffset : left, columnWidth);
-
-                if (!column.cropped) {
-                    generatedCols.push(column);
-                    if (reverse) {
-                        left -= columnWidth;
-                    } else {
-                        left += columnWidth;
-                    }
-                }
+                /*Bohr*/
                 if (to) {
                     if (reverse) {
                         if (excludeTo && date < to || !excludeTo && date <= to) {
@@ -95,6 +85,18 @@
                         }
                     }
                 }
+                /**/
+                var column = builder.newColumn(startDate, endDate, leftOffset ? left + leftOffset : left, columnWidth);
+
+                if (!column.cropped) {
+                    generatedCols.push(column);
+                    if (reverse) {
+                        left -= columnWidth;
+                    } else {
+                        left += columnWidth;
+                    }
+                }
+                
                 if (reverse) {
                     date.add(-viewScaleValue, viewScaleUnit);
                     ensureNoUnitOverflow(viewScaleUnit, date, startDate);

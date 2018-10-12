@@ -20,7 +20,7 @@
                         // Load options from global options attribute.
                         if (scope.options && typeof(scope.options.dependencies) === 'object') {
                             for (var option in scope.options.dependencies) {
-                                scope[option] = scope.options[option];
+                                scope[option] = scope.options.dependencies[option];
                             }
                         }
 
@@ -37,6 +37,10 @@
                             scope.jsPlumbDefaults = {
                                 Endpoint: ['Dot', {radius: 4}],
                                 EndpointStyle: {fillStyle: '#456', strokeStyle: '#456', lineWidth: 1},
+                                PaintStyle: {
+                                    strokeWidth: 3,
+                                    stroke: 'rgb(68, 85, 102)'
+                                },
                                 Connector: 'Flowchart',
                                 ConnectionOverlays: [['Arrow', {location: 1, length: 12, width: 12}]]
                             };

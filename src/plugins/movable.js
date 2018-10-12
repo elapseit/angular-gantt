@@ -20,7 +20,7 @@
                     // Load options from global options attribute.
                     if (scope.options && typeof(scope.options.movable) === 'object') {
                         for (var option in scope.options.movable) {
-                            scope[option] = scope.options[option];
+                            scope[option] = scope.options.movable[option];
                         }
                     }
 
@@ -174,8 +174,10 @@
                                         var sourceRow = taskScope.task.row;
 
                                         if (targetRow !== undefined && sourceRow !== targetRow) {
-                                            targetRow.moveTaskToRow(taskScope.task, true);
-                                            taskHasBeenChanged = true;
+                                            if (!angular.isFunction(allowRowSwitching) || allowRowSwitching(taskScope.task, targetRow)) {
+                                                targetRow.moveTaskToRow(taskScope.task, true);
+                                                taskHasBeenChanged = true;
+                                            }
                                         }
                                     }
 
@@ -362,11 +364,11 @@
                                 taskScope.task.active = true;
 
                                 // Apply CSS style
-                                var backgroundElement = taskScope.task.getBackgroundElement();
+                                var taskElement = taskScope.task.$element;
                                 if (taskScope.task.moveMode === 'M') {
-                                    backgroundElement.addClass('gantt-task-resizing');
+                                    taskElement.addClass('gantt-task-resizing');
                                 } else {
-                                    backgroundElement.addClass('gantt-task-moving');
+                                    taskElement.addClass('gantt-task-moving');
                                 }
 
                                 // Add move event handler
@@ -420,9 +422,9 @@
                                 taskScope.task.active = false;
 
                                 // Remove CSS class
-                                var getBackgroundElement = taskScope.task.getBackgroundElement();
-                                getBackgroundElement.removeClass('gantt-task-moving');
-                                getBackgroundElement.removeClass('gantt-task-resizing');
+                                var taskElement = taskScope.task.$element;
+                                taskElement.removeClass('gantt-task-moving');
+                                taskElement.removeClass('gantt-task-resizing');
 
                                 // Stop any active auto scroll
                                 clearScrollInterval();

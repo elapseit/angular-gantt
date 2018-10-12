@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width">
 
     <link rel="canonical" href="https://www.angular-gantt.com/">
-    <link rel="shortcut icon" href="http://www.angular-gantt.com/img/favicon.ico">
+    <link rel="shortcut icon" href="https://www.angular-gantt.com/img/favicon.ico">
 
     <meta property="og:title" content="Angular Gantt (Demo)" />
     <meta property="og:description" content="Gantt chart component for AngularJS" />
@@ -220,6 +220,12 @@
                                                 </div>
 
                                             </div>
+                                            <div class="form-inline">
+                                            	<div class="form-group text-center">
+                                                    <label class="control-label"><i class="fa fa-sort"></i> Color</label><br>
+                                                    <button type="button" style="width: 6em; text-align: left" class="btn btn-default" ng-model="options.color" bs-options="m.value as m.label for m in {{options.colors}}" bs-select></button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -238,10 +244,10 @@
                                 </h4>
                             </div>
                             <div class="panel-collapse" bs-collapse-target>
-                                <div class="panel-body">
+                                <div class="panel-body" id="gantt-container" style="height: 600px; padding-bottom: 30px">
                                     <div gantt
                                          data="data"
-                                         timespans="timespans"
+                                         
                                          show-side="options.labelsEnabled"
                                          daily="options.daily"
                                          filter-task="{'name': options.filterTask}"
@@ -260,13 +266,10 @@
                                          current-date-value="options.currentDateValue"
                                          headers="options.width && options.shortHeaders || options.longHeaders"
                                          max-height="options.maxHeight && 300 || 0"
-                                         time-frames="options.timeFrames"
-                                         date-frames="options.dateFrames"
-                                         time-frames-working-mode="options.timeFramesWorkingMode"
-                                         time-frames-non-working-mode="options.timeFramesNonWorkingMode"
-                                         time-frames-magnet="options.timeFramesMagnet"
+                                         
                                          api="options.api"
-                                         column-magnet="options.columnMagnet">
+                                         column-magnet="options.columnMagnet"
+										 gantt-container-id="gantt-container">
                                         <gantt-tree enabled="options.sideMode === 'Tree' || options.sideMode === 'TreeTable'"
                                                     header-content="options.treeHeaderContent"
                                                     keep-ancestor-on-filter-row="true">
@@ -279,19 +282,21 @@
                                                      contents="options.columnsContents"
                                                      header-contents="options.columnsHeaderContents">
                                         </gantt-table>
+                                        <gantt-corner headers-labels="options.corner.headersLabels" headers-labels-templates="options.corner.headersLabelsTemplates"></gantt-corner>
                                         <gantt-groups enabled="options.groupDisplayMode === 'group' || options.groupDisplayMode === 'overview' || options.groupDisplayMode === 'promote'" display="options.groupDisplayMode"></gantt-groups>
-                                        <gantt-tooltips></gantt-tooltips>
+                                        <!--<gantt-tooltips></gantt-tooltips>-->
                                         <gantt-bounds></gantt-bounds>
                                         <gantt-progress></gantt-progress>
                                         <gantt-sortable></gantt-sortable>
-                                        <gantt-movable enabled="!options.readOnly"></gantt-movable>
+                                        <gantt-sections></gantt-sections>
+                                        <gantt-movable enabled="!options.readOnly" allow-row-switching="options.movable.allowRowSwitching"></gantt-movable>
                                         <gantt-draw-task
                                             enabled="options.canDraw"
                                             move-threshold="2"
                                             task-factory="options.drawTaskFactory">
                                         </gantt-draw-task>
                                         <gantt-overlap></gantt-overlap>
-                                        <gantt-resize-sensor></gantt-resize-sensor>
+                                        
                                         <gantt-dependencies
                                             enabled="options.dependencies.enabled"
                                             conflict-checker="options.dependencies.conflictChecker"
@@ -364,12 +369,13 @@
 <script src="bower_components/angular-ui-tree/dist/angular-ui-tree.js"></script>
 <script src="bower_components/moment/moment.js"></script>
 <script src="bower_components/angular-moment/angular-moment.js"></script>
+<script src="bower_components/scrollMonitor/scrollMonitor.js"></script>
+<script src="bower_components/angular-viewport-watch/angular-viewport-watch.js"></script>
 <script src="bower_components/angular-gantt/assets/angular-gantt.js"></script>
 <script src="bower_components/angular-gantt/assets/angular-gantt-plugins.js"></script>
 <script src="bower_components/moment-range/dist/moment-range.js"></script>
 <script src="bower_components/css-element-queries/src/ElementQueries.js"></script>
 <script src="bower_components/css-element-queries/src/ResizeSensor.js"></script>
-<script src="bower_components/jsplumb/dist/js/jsPlumb-2.1.8.js"></script>
 <!-- endbower -->
 <!-- endbuild -->
 

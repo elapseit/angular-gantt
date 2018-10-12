@@ -18,12 +18,15 @@ angular.module('angularGanttDemoApp', [
     'gantt.progress',
     'gantt.table',
     'gantt.tree',
+    'gantt.corner',
     'gantt.groups',
+    'gantt.sections',
     'gantt.dependencies',
     'gantt.overlap',
     'gantt.resizeSensor',
     'ngAnimate',
-    'mgcrea.ngStrap'
+    'mgcrea.ngStrap',
+    'angularViewportWatch'
 ]).config(['$compileProvider', function($compileProvider) {
-    $compileProvider.debugInfoEnabled(false); // Remove debug info (angularJS >= 1.3)
+    $compileProvider.debugInfoEnabled(true); // Remove debug info (angularJS >= 1.3)
 }]);

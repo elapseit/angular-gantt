@@ -6,7 +6,7 @@
             this.row = row;
             this.model = model;
             this.truncatedLeft = false;
-            this.truncatedRight = false;
+            this.truncatedRight = false;    
         };
 
         Task.prototype.isMilestone = function() {
@@ -47,29 +47,36 @@
                 modelWidth = this.rowsManager.gantt.getPositionByDate(moment(this.model.to).endOf('day')) - modelLeft;
             }
 
-            if (modelLeft === undefined || modelWidth === undefined ||
-                modelLeft + modelWidth < 0 || modelLeft > maxModelLeft) {
+            var minModelLeft = -modelWidth;
+            if (modelLeft < minModelLeft) {
+                modelLeft = minModelLeft;
+            }
+
+            if (modelLeft > maxModelLeft) {
+                modelLeft = maxModelLeft;
+            }
+
+            if (modelLeft === undefined || modelWidth === undefined) {
                 this.left = undefined;
                 this.width = undefined;
             } else {
-                this.left = Math.min(Math.max(modelLeft, 0), this.rowsManager.gantt.width);
+                this.left = modelLeft;
+                this.width = modelWidth;
                 if (modelLeft < 0) {
                     this.truncatedLeft = true;
-                    if (modelWidth + modelLeft > this.rowsManager.gantt.width) {
-                        this.truncatedRight = true;
-                        this.width = this.rowsManager.gantt.width;
-                    } else {
-                        this.truncatedRight = false;
-                        this.width = modelWidth + modelLeft;
-                    }
+                    this.truncatedLeftOffset = -modelLeft;
+                    this.truncatedRight = false;
+                    this.truncatedRightOffset = undefined;
                 } else if (modelWidth + modelLeft > this.rowsManager.gantt.width) {
                     this.truncatedRight = true;
+                    this.truncatedRightOffset = modelWidth + modelLeft - this.rowsManager.gantt.width;
                     this.truncatedLeft = false;
-                    this.width = this.rowsManager.gantt.width - modelLeft;
+                    this.truncatedLeftOffset = undefined;
                 } else {
                     this.truncatedLeft = false;
+                    this.truncatedLeftOffset = undefined;
                     this.truncatedRight = false;
-                    this.width = modelWidth;
+                    this.truncatedRightOffset = modelWidth + modelLeft - this.rowsManager.gantt.width;
                 }
 
                 if (this.width < 0) {
@@ -98,6 +105,7 @@
                     if (this.model.priority > 0) {
                         var priority = this.model.priority;
                         var children = this.$element.children();
+                        this.$element.css('z-index', priority);
                         for (var i = 0; i < children.length; i++) {
                             angular.element(children[i]).css('z-index', priority);
                         }
@@ -178,6 +186,7 @@
             return new Task(this.row, angular.copy(this.model));
         };
 
+        
         return Task;
     }]);
 }());

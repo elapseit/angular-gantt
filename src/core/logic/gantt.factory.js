@@ -1,8 +1,8 @@
 (function() {
     'use strict';
     angular.module('gantt').factory('Gantt', [
-        'GanttApi', 'GanttOptions', 'GanttCalendar', 'GanttScroll', 'GanttBody', 'GanttRowHeader', 'GanttHeader', 'GanttSide', 'GanttObjectModel', 'GanttRowsManager', 'GanttColumnsManager', 'GanttTimespansManager', 'GanttCurrentDateManager', 'ganttArrays', 'moment', '$document', '$timeout',
-        function(GanttApi, Options, Calendar, Scroll, Body, RowHeader, Header, Side, ObjectModel, RowsManager, ColumnsManager, TimespansManager, CurrentDateManager, arrays, moment, $document, $timeout) {
+        'GanttApi', 'GanttOptions', 'GanttCalendar', 'GanttScroll', 'GanttBody', 'GanttRowHeader', 'GanttHeader', 'GanttSide', 'GanttObjectModel', 'GanttRowsManager', 'GanttTasksManager', 'GanttColumnsManager', 'GanttTimespansManager', 'GanttCurrentDateManager', 'ganttArrays', 'moment', '$document', '$timeout',
+        function(GanttApi, Options, Calendar, Scroll, Body, RowHeader, Header, Side, ObjectModel, RowsManager, TasksManager, ColumnsManager, TimespansManager, CurrentDateManager, arrays, moment, $document, $timeout) {
             // Gantt logic. Manages the columns, rows and sorting functionality.
             var Gantt = function($scope, $element) {
                 var self = this;
@@ -29,7 +29,9 @@
                     'timeFrames': [],
                     'dateFrames': [],
                     'timeFramesWorkingMode': 'hidden',
-                    'timeFramesNonWorkingMode': 'visible'
+                    'timeFramesNonWorkingMode': 'visible',
+                    'taskLimitThreshold': 100,
+                    'columnLimitThreshold': 500
                 });
 
                 this.api = new GanttApi(this);
@@ -66,6 +68,8 @@
                 this.api.registerMethod('timeframes', 'clearDateFrames', this.calendar.clearDateFrames, this.calendar);
                 this.api.registerMethod('timeframes', 'registerTimeFrameMappings', this.calendar.registerTimeFrameMappings, this.calendar);
                 this.api.registerMethod('timeframes', 'clearTimeFrameMappings', this.calendar.clearTimeFrameMappings, this.calendar);
+                
+                this.api.registerMethod('tasks', 'updateStyle', Gantt.prototype.updateTaskStyle, this);
 
                 $scope.$watchGroup(['timeFrames', 'dateFrames'], function(newValues, oldValues) {
                     if (newValues !== oldValues) {
@@ -144,9 +148,12 @@
                 this.objectModel = new ObjectModel(this.api);
 
                 this.rowsManager = new RowsManager(this);
+                this.tasksManager = new TasksManager(this);
                 this.columnsManager = new ColumnsManager(this);
                 this.timespansManager = new TimespansManager(this);
                 this.currentDateManager = new CurrentDateManager(this);
+                
+                this.ganttContainerId = this.$scope.ganttContainerId;
 
                 this.originalWidth = 0;
                 this.width = 0;
@@ -185,7 +192,7 @@
 
                             // DEPRECATED
                             var removedRows = [];
-                            for(i = 0, l = oldData.length; i < l; i++){
+                            for (i = 0, l = oldData.length; i < l; i++) {
                                 if (toRemoveIds.indexOf(oldData[i].id) > -1) {
                                     removedRows.push(oldData[i]);
                                 }
@@ -214,6 +221,58 @@
                 });
             };
 
+            /**
+             * Get the magnet value and unit considering the current gantt state.
+             *
+             * @returns {[*,*]}
+             */
+            Gantt.prototype.getMagnetValueAndUnit = function() {
+                if (this.shiftKey) {
+                    if (this.shiftColumnMagnetValue !== undefined && this.shiftColumnMagnetUnit !== undefined) {
+                        return [this.shiftColumnMagnetValue, this.shiftColumnMagnetUnit];
+                    } else {
+                        var viewScale = this.options.value('viewScale');
+                        viewScale = viewScale.trim();
+                        var viewScaleValue;
+                        var viewScaleUnit;
+                        var splittedViewScale;
+
+                        if (viewScale) {
+                            splittedViewScale = viewScale.split(' ');
+                        }
+                        if (splittedViewScale && splittedViewScale.length > 1) {
+                            viewScaleValue = parseFloat(splittedViewScale[0]);
+                            viewScaleUnit = moment.normalizeUnits(splittedViewScale[splittedViewScale.length - 1]);
+                        } else {
+                            viewScaleValue = 1;
+                            viewScaleUnit = moment.normalizeUnits(viewScale);
+                        }
+                        return [viewScaleValue * 0.25, viewScaleUnit];
+                    }
+                } else {
+                    return [this.columnMagnetValue, this.columnMagnetUnit];
+                }
+            };
+
+            // Get the date transformed by magnet feature.
+            Gantt.prototype.getMagnetDate = function(date, disableExpand) {
+                if (date === undefined) {
+                    return undefined;
+                }
+
+                if (!moment.isMoment(moment)) {
+                    date = moment(date);
+                }
+
+                var column = this.columnsManager.getColumnByDate(date, disableExpand);
+                var magnetValueAndUnit = this.getMagnetValueAndUnit();
+
+                var magnetValue = magnetValueAndUnit[0];
+                var magnetUnit = magnetValueAndUnit[1];
+
+                return column.getMagnetDate(date, magnetValue, magnetUnit, this.options.value('timeFramesMagnet'));
+            };
+
             // Returns the exact column date at the given position x (in em)
             Gantt.prototype.getDateByPosition = function(x, magnet, disableExpand) {
                 var column = this.columnsManager.getColumnByPosition(x, disableExpand);
@@ -221,36 +280,10 @@
                     var magnetValue;
                     var magnetUnit;
                     if (magnet) {
-                        if (this.shiftKey) {
-                            if (this.shiftColumnMagnetValue !== undefined && this.shiftColumnMagnetUnit !== undefined) {
-                                magnetValue = this.shiftColumnMagnetValue;
-                                magnetUnit = this.shiftColumnMagnetUnit;
-                            } else {
-                                var viewScale = this.options.value('viewScale');
-                                viewScale = viewScale.trim();
-                                var viewScaleValue;
-                                var viewScaleUnit;
-                                var splittedViewScale;
-
-                                if (viewScale) {
-                                    splittedViewScale = viewScale.split(' ');
-                                }
-                                if (splittedViewScale && splittedViewScale.length > 1) {
-                                    viewScaleValue = parseFloat(splittedViewScale[0]);
-                                    viewScaleUnit = moment.normalizeUnits(splittedViewScale[splittedViewScale.length - 1]);
-                                } else {
-                                    viewScaleValue = 1;
-                                    viewScaleUnit = moment.normalizeUnits(viewScale);
-                                }
-                                magnetValue = viewScaleValue * 0.25;
-                                magnetUnit = viewScaleUnit;
-                            }
-                        } else {
-                            magnetValue = this.columnMagnetValue;
-                            magnetUnit = this.columnMagnetUnit;
-                        }
+                        var magnetValueAndUnit = this.getMagnetValueAndUnit();
+                        magnetValue = magnetValueAndUnit[0];
+                        magnetUnit = magnetValueAndUnit[1];
                     }
-
                     return column.getDateByPosition(x - column.left, magnetValue, magnetUnit, this.options.value('timeFramesMagnet'));
                 } else {
                     return undefined;
@@ -356,6 +389,18 @@
                 return this.$scope.ganttElementWidth;
             };
 
+            Gantt.prototype.getHeight = function() {
+                return this.$scope.ganttElementHeight;
+            };
+
+            Gantt.prototype.getContainerWidth = function() {
+                return this.$scope.ganttContainerWidth;
+            };
+
+            Gantt.prototype.getContainerHeight = function() {
+                return this.$scope.ganttContainerHeight;
+            };
+
             Gantt.prototype.initialized = function() {
                 // Gantt is initialized. Signal that the Gantt is ready.
                 this.api.core.raise.ready(this.api);
@@ -374,6 +419,15 @@
                 $timeout(renderedFunction);
             };
 
+            Gantt.prototype.updateTaskStyle = function (id, color) {
+            	if (color[0] !== '#'){
+            		color = '#' + color;
+            	}
+            	var task = arrays.findTaskById(this.$scope.data, id);
+            	task.color = color;
+                document.getElementById(task.id).childNodes[1].style.backgroundColor = task.color; 
+            };
+            
             return Gantt;
         }]);
 }());

@@ -63,6 +63,11 @@
 
         // Removes the task from the existing row and adds it to he current one
         Row.prototype.moveTaskToRow = function(task, viewOnly) {
+            this.rowsManager.gantt.api.tasks.raise.beforeViewRowChange(task, this);
+            if (!viewOnly) {
+                this.rowsManager.gantt.api.tasks.raise.beforeRowChange(task, this);
+            }
+
             var oldRow = task.row;
             oldRow.removeTask(task.model.id, viewOnly, true);
 
@@ -102,7 +107,13 @@
             } else {
                 this.filteredTasks = this.tasks.slice(0);
             }
-            this.visibleTasks = $filter('ganttTaskLimit')(this.filteredTasks, this.rowsManager.gantt);
+
+            var limitThreshold = this.rowsManager.gantt.options.value('taskLimitThreshold');
+            if (limitThreshold === undefined || limitThreshold > 0 && this.filteredTasks.length >= limitThreshold) {
+                this.visibleTasks = $filter('ganttTaskLimit')(this.filteredTasks, this.rowsManager.gantt);
+            } else {
+                this.visibleTasks = this.filteredTasks;
+            }
         };
 
         Row.prototype.updateTasksPosAndSize = function() {

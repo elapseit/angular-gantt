@@ -77,6 +77,21 @@
                     return true;
                 }
                 return false;
+            },
+            findTaskById: function(array, id, idProperty) {
+            	var i, j;
+            	if (idProperty === undefined) {
+            		idProperty = 'taskId';
+                }
+            	for (i = array.length - 1; i >= 0; i--) {
+            		if (array[i].tasks){
+            			for (j = array[i].tasks.length - 1; j >= 0; j--){
+            				if (array[i].tasks[j][idProperty] === id) {
+            					return array[i].tasks[j];
+                     		}
+            			}
+            		}
+                }
             }
         };
     }]);

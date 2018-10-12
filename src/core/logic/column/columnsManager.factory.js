@@ -151,15 +151,30 @@
             this.from = from;
             this.to = to;
 
-            this.columns = ColumnGenerator.generate(this.columnBuilder, from, to, this.gantt.options.value('viewScale'), this.getColumnsWidth());
-            this.headers = HeadersGenerator.generate(this);
             this.previousColumns = [];
             this.nextColumns = [];
+
+            this.columns = ColumnGenerator.generate(this.columnBuilder, from, to, this.gantt.options.value('viewScale'), this.getColumnsWidth());
+            this.headers = HeadersGenerator.generate(this);
 
             this.updateColumnsMeta();
             this.scrollToScrollAnchor();
 
             this.gantt.api.columns.raise.generate(this.columns, this.headers);
+            
+
+            /*fix first and last class to column-headers element via vanilla javascript*/
+            var list = document.getElementsByClassName('gantt-header-row');
+            for (var i = 0, l = list.length; i < l; i++) {
+            	if (list[i].firstElementChild){
+            		list[i].firstElementChild.classList.add('gantt-column-header-first');   
+            	}
+            	if (list[i].lastElementChild){
+            		list[i].lastElementChild.classList.add('gantt-column-header-last');
+            	}
+            }  
+            /**/
+            
         };
 
         ColumnsManager.prototype.updateColumnsMeta = function() {
@@ -333,7 +348,7 @@
             var lastColumn = this.getLastColumn();
             var endDate;
             if (lastColumn) {
-                endDate = lastColumn.getDateByPosition(lastColumn.width);
+                endDate = lastColumn.endDate;
             }
 
             var viewScale;
@@ -361,11 +376,19 @@
         };
 
         ColumnsManager.prototype.updateVisibleColumns = function(includeViews) {
-            this.visibleColumns = $filter('ganttColumnLimit')(this.columns, this.gantt);
+            var limitThreshold = this.gantt.options.value('columnLimitThreshold');
 
-            this.visibleHeaders = [];
-            for (var i=0; i< this.headers.length; i++) {
-                this.visibleHeaders.push($filter('ganttColumnLimit')(this.headers[i], this.gantt));
+            var i;
+            if (limitThreshold === undefined || limitThreshold > 0 && this.columns.length >= limitThreshold) {
+                this.visibleColumns = $filter('ganttColumnLimit')(this.columns, this.gantt);
+
+                this.visibleHeaders = [];
+                for (i=0; i< this.headers.length; i++) {
+                    this.visibleHeaders.push($filter('ganttColumnLimit')(this.headers[i], this.gantt));
+                }
+            } else {
+                this.visibleColumns = this.columns;
+                this.visibleHeaders = this.headers;
             }
 
             if (includeViews) {
@@ -384,8 +407,8 @@
             this.gantt.currentDateManager.setCurrentDate(currentDateValue);
         };
 
-        var defaultHeadersFormats = {'year': 'YYYY', 'quarter': '[Q]Q YYYY', month: 'MMMM YYYY', week: 'w', day: 'D', hour: 'H', minute:'HH:mm'};
-        var defaultDayHeadersFormats = {day: 'LL', hour: 'H', minute:'HH:mm'};
+        var defaultHeadersFormats = {year: 'YYYY', quarter: '[Q]Q YYYY', month: 'MMMM YYYY', week: 'w', day: 'D', hour: 'H', minute:'H:mm', second:'H:mm:ss', millisecond: 'H:mm:ss:SSS'};
+        var defaultDayHeadersFormats = {day: 'LL', hour: 'H', minute:'H:mm', second:'H:mm:ss', millisecond: 'H:mm:ss:SSS'};
         var defaultYearHeadersFormats = {'year': 'YYYY', 'quarter': '[Q]Q', month: 'MMMM'};
 
         ColumnsManager.prototype.getHeaderFormat = function(unit) {
@@ -434,7 +457,7 @@
             if (scale === undefined) {
                 scale = header;
             }
-            if (['second', 'minute', 'hour', 'day', 'week', 'month', 'quarter', 'year'].indexOf(scale) === -1) {
+            if (['millisecond', 'second', 'minute', 'hour', 'day', 'week', 'month', 'quarter', 'year'].indexOf(scale) === -1) {
                 scale = 'day';
             }
             return scale;

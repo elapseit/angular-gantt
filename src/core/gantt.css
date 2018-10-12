@@ -18,7 +18,6 @@
 .gantt-side,
 .gantt-task {
     cursor: default;
-    z-index: 10; /* Tasks are displayed over everything else */
 }
 
 .gantt-header {
@@ -42,7 +41,6 @@
 .gantt-valign-content {
     position: relative;
     top: 50%;
-    -webkit-transform: translateY(-50%);
     transform: translateY(-50%);
 }
 
@@ -191,7 +189,6 @@
     margin-right: auto;
     width: 4px;
     background-color: #DDDDDD;
-    background-image: -webkit-linear-gradient(0deg, transparent 50%, rgba(255, 255, 255, .5) 50%);
     background-image: linear-gradient(90deg, transparent 50%, rgba(255, 255, 255, .5) 50%);
     background-size: 2px 2px;
     height: 100%;
@@ -265,6 +262,7 @@
 
     background-color: grey;
     border-radius: 2px;
+    overflow: hidden;
 }
 
 .gantt-task-foreground {
@@ -338,4 +336,19 @@
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+}
+
+.gantt-header-columns > div:last-child > div {
+    border-bottom: 1px solid #dddddd;
+}
+
+.gantt-header-columns > div:first-child > div {
+    border-top: 1px solid #dddddd;
+}
+
+.gantt-table-content > div > div:nth-child(even) {
+	background-color: #EFEFEF;
+}
+.gantt-body-background > :nth-child(even) {
+	background-color: #efefef;
 }

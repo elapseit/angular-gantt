@@ -7,6 +7,9 @@ repo_url: https://github.com/angular-gantt/angular-gantt
 
 theme: spacelab
 
+docs_dir: mkdocs
+site_dir: docs
+
 pages:
 - [index.md, Home]
 - [get-started.md, Get Started]
@@ -20,6 +23,7 @@ pages:
 - [plugins/labels.md, Plugins, Labels]
 - [plugins/table.md, Plugins, Table]
 - [plugins/tree.md, Plugins, Tree]
+- [plugins/corner.md, Plugins, Corner]
 - [plugins/groups.md, Plugins, Groups]
 - [plugins/dependencies.md, Plugins, Dependencies]
 - [plugins/sortable.md, Plugins, Sortable]
@@ -27,6 +31,7 @@ pages:
 - [plugins/drawtask.md, Plugins, Draw Task]
 - [plugins/tooltips.md, Plugins, Tooltips]
 - [plugins/bounds.md, Plugins, Bounds]
+- [plugins/sections.md, Plugins, Sections]
 - [plugins/progress.md, Plugins, Progress]
 - [plugins/overlap.md, Plugins, Overlap]
 - [plugins/resizeSensor.md, Plugins, Resize Sensor]
