@@ -172,6 +172,10 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                                         var rows = ganttCtrl.gantt.rowsManager.rows;
                                         var targetRow;
                                         for (var i= 0, l=rows.length; i<l; i++) {
+											if(!rows[i].$element){
+                                                continue;
+                                            }
+
                                             if (targetRowElement === rows[i].$element[0]) {
                                                 targetRow = rows[i];
                                                 break;
