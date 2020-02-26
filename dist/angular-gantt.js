@@ -681,12 +681,17 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                     for (var j=0; j < targets.length; j++) {
                         var timeFrameMapping = this.timeFrameMappings[targets[j]];
                         if (timeFrameMapping !== undefined) {
+                            var tf = timeFrameMapping.getTimeFrames();
+                            tf.holidayId = dateFrames[i].holidayId;
+                            tf.holidayLocations = dateFrames[i].holidayLocations;
                             // If a timeFrame mapping is found
-                            timeFrames.push(timeFrameMapping.getTimeFrames());
+                            timeFrames.push(tf);
                         } else {
                             // If no timeFrame mapping is found, try using direct timeFrame
                             var timeFrame = this.timeFrames[targets[j]];
                             if (timeFrame !== undefined) {
+                                timeFrame.holidayId = dateFrames[i].holidayId;
+                                timeFrame.holidayLocations = dateFrames[i].holidayLocations;
                                 timeFrames.push(timeFrame);
                             }
                         }
