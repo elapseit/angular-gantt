@@ -699,6 +699,8 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                 }
             }
 
+            console.log("get1", timeFrames);
+
             var dateYear = date.year();
             var dateMonth = date.month();
             var dateDate = date.date();
@@ -734,6 +736,7 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                 validatedTimeFrames.push(cTimeFrame);
             }
 
+            console.log("get2", validatedTimeFrames);
             return validatedTimeFrames;
         };
 
@@ -864,6 +867,7 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                     (timeFrame.end === undefined || timeFrame.end > startDate);
             });
 
+            console.log("solved", solvedTimeFrames)
             return solvedTimeFrames;
 
         };
@@ -1007,6 +1011,8 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                         cTimeFrames.push(cTimeFrame);
                     }
                     self.timeFrames = self.timeFrames.concat(cTimeFrames);
+
+                    console.log("tf", self.timeFrames);
 
                     var cDateKey = getDateKey(cDate);
                     self.daysTimeFrames[cDateKey] = cTimeFrames;
