@@ -9,82 +9,82 @@ Github: https://github.com/angular-gantt/angular-gantt.git
     'use strict';
     angular.module('gantt', ['gantt.templates', 'angularMoment'])
         .directive('gantt', ['Gantt', 'ganttEnableNgAnimate', '$timeout', '$templateCache', function(Gantt, enableNgAnimate, $timeout, $templateCache) {
-        return {
-            restrict: 'A',
-            transclude: true,
-            templateUrl: function(tElement, tAttrs) {
-                var templateUrl;
-                if (tAttrs.templateUrl === undefined) {
-                    templateUrl = 'template/gantt.tmpl.html';
-                } else {
-                    templateUrl = tAttrs.templateUrl;
-                }
-                if (tAttrs.template !== undefined) {
-                    $templateCache.put(templateUrl, tAttrs.template);
-                }
-                return templateUrl;
-            },
-            scope: {
-                sortMode: '=?',
-                filterTask: '=?',
-                filterTaskComparator: '=?',
-                filterRow: '=?',
-                filterRowComparator: '=?',
-                viewScale: '=?',
-                columnWidth: '=?',
-                expandToFit: '=?',
-                shrinkToFit: '=?',
-                showSide: '=?',
-                allowSideResizing: '=?',
-                fromDate: '=?',
-                toDate: '=?',
-                currentDateValue: '=?',
-                currentDate: '=?',
-                daily: '=?',
-                autoExpand: '=?',
-                taskOutOfRange: '=?',
-                taskContent: '=?',
-                rowContent: '=?',
-                maxHeight: '=?',
-                sideWidth: '=?',
-                headers: '=?',
-                headersFormats: '=?',
-                headersScales: '=?',
-                timeFrames: '=?',
-                dateFrames: '=?',
-                timeFramesWorkingMode: '=?',
-                timeFramesNonWorkingMode: '=?',
-                timespans: '=?',
-                columnMagnet: '=?',
-                shiftColumnMagnet: '=?',
-                timeFramesMagnet: '=?',
-                data: '=?',
-                api: '=?',
-                options: '=?'
-            },
-            controller: ['$scope', '$element', function($scope, $element) {
-                for (var option in $scope.options) {
-                    $scope[option] = $scope.options[option];
-                }
+            return {
+                restrict: 'A',
+                transclude: true,
+                templateUrl: function(tElement, tAttrs) {
+                    var templateUrl;
+                    if (tAttrs.templateUrl === undefined) {
+                        templateUrl = 'template/gantt.tmpl.html';
+                    } else {
+                        templateUrl = tAttrs.templateUrl;
+                    }
+                    if (tAttrs.template !== undefined) {
+                        $templateCache.put(templateUrl, tAttrs.template);
+                    }
+                    return templateUrl;
+                },
+                scope: {
+                    sortMode: '=?',
+                    filterTask: '=?',
+                    filterTaskComparator: '=?',
+                    filterRow: '=?',
+                    filterRowComparator: '=?',
+                    viewScale: '=?',
+                    columnWidth: '=?',
+                    expandToFit: '=?',
+                    shrinkToFit: '=?',
+                    showSide: '=?',
+                    allowSideResizing: '=?',
+                    fromDate: '=?',
+                    toDate: '=?',
+                    currentDateValue: '=?',
+                    currentDate: '=?',
+                    daily: '=?',
+                    autoExpand: '=?',
+                    taskOutOfRange: '=?',
+                    taskContent: '=?',
+                    rowContent: '=?',
+                    maxHeight: '=?',
+                    sideWidth: '=?',
+                    headers: '=?',
+                    headersFormats: '=?',
+                    headersScales: '=?',
+                    timeFrames: '=?',
+                    dateFrames: '=?',
+                    timeFramesWorkingMode: '=?',
+                    timeFramesNonWorkingMode: '=?',
+                    timespans: '=?',
+                    columnMagnet: '=?',
+                    shiftColumnMagnet: '=?',
+                    timeFramesMagnet: '=?',
+                    data: '=?',
+                    api: '=?',
+                    options: '=?'
+                },
+                controller: ['$scope', '$element', function($scope, $element) {
+                    for (var option in $scope.options) {
+                        $scope[option] = $scope.options[option];
+                    }
 
-                // Disable animation if ngAnimate is present, as it drops down performance.
-                enableNgAnimate($element, false);
+                    // Disable animation if ngAnimate is present, as it drops down performance.
+                    enableNgAnimate($element, false);
 
-                $scope.gantt = new Gantt($scope, $element);
-                this.gantt = $scope.gantt;
-            }],
-            link: function(scope, element) {
-                scope.gantt.api.directives.raise.new('gantt', scope, element);
-                scope.$on('$destroy', function() {
-                    scope.gantt.api.directives.raise.destroy('gantt', scope, element);
-                });
+                    $scope.gantt = new Gantt($scope, $element);
+                    this.gantt = $scope.gantt;
+                }],
+                link: function(scope, element) {
+                    scope.gantt.api.directives.raise.new('gantt', scope, element);
+                    scope.$on('$destroy', function() {
+                        scope.gantt.api.directives.raise.destroy('gantt', scope, element);
+                    });
 
-                $timeout(function() {
-                    scope.gantt.initialized();
-                });
-            }
-        };
-    }]);
+                    $timeout(function() {
+                        scope.gantt.initialized();
+                    });
+                }
+            };
+        }]);
 }());
 
 
@@ -520,6 +520,8 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                 this.targets = [options.targets];
             }
             this.default = options.default;
+            this.holidayId = options.holidayId;
+            this.holidayLocations = options.holidayLocations;
         };
 
         DateFrame.prototype.dateMatch = function(date) {
@@ -699,8 +701,6 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                 }
             }
 
-            console.log("get1", timeFrames);
-
             var dateYear = date.year();
             var dateMonth = date.month();
             var dateDate = date.date();
@@ -716,6 +716,9 @@ Github: https://github.com/angular-gantt/angular-gantt.git
 
             for (i=0; i < timeFrames.length; i++) {
                 var cTimeFrame = timeFrames[i].clone();
+
+                cTimeFrame.holidayId = timeFrames[i].holidayId;
+                cTimeFrame.holidayLocations = timeFrames[i].holidayLocations;
 
                 if (cTimeFrame.start !== undefined) {
                     cTimeFrame.start.year(dateYear);
@@ -735,8 +738,6 @@ Github: https://github.com/angular-gantt/angular-gantt.git
 
                 validatedTimeFrames.push(cTimeFrame);
             }
-
-            console.log("get2", validatedTimeFrames);
             return validatedTimeFrames;
         };
 
@@ -829,10 +830,18 @@ Github: https://github.com/angular-gantt/angular-gantt.git
 
                             var newSolvedTimeFrame = sTimeFrame.clone();
 
+                            newSolvedTimeFrame.holidayId = sTimeFrame.holidayId;
+                            newSolvedTimeFrame.holidayLocations = sTimeFrame.holidayLocations;
+
                             sTimeFrame.end = moment(oTimeFrame.start);
                             newSolvedTimeFrame.start = moment(oTimeFrame.end);
 
-                            tmpSolvedTimeFrames.splice(k + 1, 0, oTimeFrame.clone(), newSolvedTimeFrame);
+                            var tf2 = oTimeFrame.clone();
+
+                            tf2.holidayId = oTimeFrame.holidayId;
+                            tf2.holidayLocations = oTimeFrame.holidayLocations;
+
+                            tmpSolvedTimeFrames.splice(k + 1, 0, tf2, newSolvedTimeFrame);
                             treated = true;
                             dispatched = false;
                         } else if (!dispatched && oTimeFrame.start < sTimeFrame.end) {
@@ -843,7 +852,13 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                             //          result:|sssssssssssssssssssssssssssssss|tttttt|;s+1;s+1;s+1;s+1;s+1|
 
                             sTimeFrame.end = moment(oTimeFrame.start);
-                            tmpSolvedTimeFrames.splice(k + 1, 0, oTimeFrame.clone());
+
+                            var tf2 = oTimeFrame.clone();
+
+                            tf2.holidayId = oTimeFrame.holidayId;
+                            tf2.holidayLocations = oTimeFrame.holidayLocations;
+
+                            tmpSolvedTimeFrames.splice(k + 1, 0, tf2);
 
                             dispatched = true;
                         } else if (dispatched && oTimeFrame.end > sTimeFrame.start) {
@@ -867,7 +882,6 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                     (timeFrame.end === undefined || timeFrame.end > startDate);
             });
 
-            console.log("solved", solvedTimeFrames)
             return solvedTimeFrames;
 
         };
@@ -1003,7 +1017,13 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                             end = self.endDate;
                         }
 
+                        var holidayId = cTimeFrame.holidayId;
+                        var holidayLocations = cTimeFrame.holidayLocations;
+
                         cTimeFrame = cTimeFrame.clone();
+
+                        cTimeFrame.holidayId = holidayId;
+                        cTimeFrame.holidayLocations = holidayLocations;
 
                         cTimeFrame.start = moment(start);
                         cTimeFrame.end = moment(end);
@@ -1011,8 +1031,6 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                         cTimeFrames.push(cTimeFrame);
                     }
                     self.timeFrames = self.timeFrames.concat(cTimeFrames);
-
-                    console.log("tf", self.timeFrames);
 
                     var cDateKey = getDateKey(cDate);
                     self.daysTimeFrames[cDateKey] = cTimeFrames;
@@ -3185,7 +3203,7 @@ Github: https://github.com/angular-gantt/angular-gantt.git
             var lastColumn = this.rowsManager.gantt.columnsManager.getLastColumn();
 
             return (firstColumn === undefined || this.model.to < firstColumn.date ||
-            lastColumn === undefined || this.model.from > lastColumn.endDate);
+                lastColumn === undefined || this.model.from > lastColumn.endDate);
         };
 
         // Updates the pos and size of the task according to the from - to date
@@ -3248,9 +3266,9 @@ Github: https://github.com/angular-gantt/angular-gantt.git
             this.updateView();
             if (!this.rowsManager.gantt.isRefreshingColumns &&
                 (oldViewLeft !== this.left ||
-                oldViewWidth !== this.width ||
-                oldTruncatedRight !== this.truncatedRight ||
-                oldTruncatedLeft !== this.truncatedLeft)) {
+                    oldViewWidth !== this.width ||
+                    oldTruncatedRight !== this.truncatedRight ||
+                    oldTruncatedLeft !== this.truncatedLeft)) {
                 this.rowsManager.gantt.api.tasks.raise.viewChange(this);
             }
         };
@@ -3480,17 +3498,17 @@ Github: https://github.com/angular-gantt/angular-gantt.git
 
         Scroll.prototype.getBordersWidth = function() {
             if (this.$element === undefined) {
-               return undefined;
+                return undefined;
             }
 
             if (this.$element[0].clientWidth) {
-               return this.$element[0].offsetWidth - this.$element[0].clientWidth;
+                return this.$element[0].offsetWidth - this.$element[0].clientWidth;
             } else {
-               //fix for IE11
-               var borderLeft = window.getComputedStyle(this.$element[0]).getPropertyValue('border-left-width') ? window.getComputedStyle(this.$element[0]).getPropertyValue('border-left-width').match(/\d+/)[0] : 0;
-               var borderRight = window.getComputedStyle(this.$element[0]).getPropertyValue('border-right-width') ? window.getComputedStyle(this.$element[0]).getPropertyValue('border-right-width').match(/\d+/)[0] : 0;
+                //fix for IE11
+                var borderLeft = window.getComputedStyle(this.$element[0]).getPropertyValue('border-left-width') ? window.getComputedStyle(this.$element[0]).getPropertyValue('border-left-width').match(/\d+/)[0] : 0;
+                var borderRight = window.getComputedStyle(this.$element[0]).getPropertyValue('border-right-width') ? window.getComputedStyle(this.$element[0]).getPropertyValue('border-right-width').match(/\d+/)[0] : 0;
 
-               return parseInt(borderLeft) + parseInt(borderRight);
+                return parseInt(borderLeft) + parseInt(borderRight);
             }
         };
 
